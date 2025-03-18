@@ -1,0 +1,43 @@
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+# Sample data (in-memory)
+items = [
+    {"id": 1, "name": "Item 1", "description": "This is item 1"},
+    {"id": 2, "name": "Item 2", "description": "This is item 2"},
+]
+
+@app.route("/items", methods=["GET"])
+def get_items():
+    """
+    Retrieves all items.
+    """
+    return jsonify(items)
+
+@app.route("/items/<int:item_id>", methods=["GET"])
+def get_item(item_id):
+    """
+    Retrieves a specific item by ID.
+    """
+    item = next((item for item in items if item["id"] == item_id), None)
+    if item:
+        return jsonify(item)
+    else:
+        return jsonify({"message": "Item not found"}), 404
+
+@app.route("/items", methods=["POST"])
+def create_item():
+    """
+    Creates a new item.
+    """
+    new_item = request.get_json()
+    if new_item:
+        new_item["id"] = len(items) + 1
+        items.append(new_item)
+        return jsonify(new_item), 201
+    else:
+        return jsonify({"message": "Invalid item data"}), 400
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
